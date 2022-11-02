@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private FormAuthenticationProvider authenticationProvider;
 
-	private static final String[] URLS = { "/css/**", "/images/**", "/scripts/**", "/h2-console/**" };
+	private static final String[] URLS = { "/css/**", "/images/**", "/scripts/**", "/h2-console/**", "/favicon.ico" };
 
 	/**
 	 * 認証から除外する
@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
-        http.authorizeRequests().antMatchers("/login", "/logout-complete", "/users/new", "/user").permitAll()
+        http.authorizeRequests().antMatchers("/", "/login", "/logout-complete", "/users/new", "/user").permitAll()
                 .anyRequest().authenticated()
                 // ログアウト処理
                 .and().logout().logoutUrl("/logout").logoutSuccessUrl("/logout-complete").clearAuthentication(true)
