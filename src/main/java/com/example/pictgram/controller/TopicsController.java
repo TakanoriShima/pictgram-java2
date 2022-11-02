@@ -42,6 +42,9 @@ import com.example.pictgram.repository.TopicRepository;
 import java.util.Locale;
 import org.springframework.context.MessageSource;
 
+import com.example.pictgram.entity.Favorite;
+import com.example.pictgram.form.FavoriteForm;
+
 @Controller
 public class TopicsController {
 
@@ -81,6 +84,9 @@ public class TopicsController {
 	public TopicForm getTopic(UserInf user, Topic entity) throws FileNotFoundException, IOException {
 		modelMapper.getConfiguration().setAmbiguityIgnored(true);
 		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setUser));
+		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setFavorites));
+		modelMapper.typeMap(Favorite.class, FavoriteForm.class)
+				.addMappings(mapper -> mapper.skip(FavoriteForm::setTopic));
 
 		boolean isImageLocal = false;
 		if (imageLocal != null) {
@@ -107,6 +113,15 @@ public class TopicsController {
 		}
 
 		UserForm userForm = modelMapper.map(entity.getUser(), UserForm.class);
+		List<FavoriteForm> favorites = new ArrayList<FavoriteForm>();
+		for (Favorite favoriteEntity : entity.getFavorites()) {
+			FavoriteForm favorite = modelMapper.map(favoriteEntity, FavoriteForm.class);
+			favorites.add(favorite);
+			if (user.getUserId().equals(favoriteEntity.getUserId())) {
+				form.setFavorite(favorite);
+			}
+		}
+		form.setFavorites(favorites);
 		form.setUser(userForm);
 
 		return form;
@@ -172,7 +187,8 @@ public class TopicsController {
 		redirAttrs.addFlashAttribute("hasMessage", true);
 		redirAttrs.addFlashAttribute("class", "alert-info");
 //		redirAttrs.addFlashAttribute("message", "投稿に成功しました。");
-		redirAttrs.addFlashAttribute("message", messageSource.getMessage("topics.create.flash.2", new String[] {}, locale));
+		redirAttrs.addFlashAttribute("message",
+				messageSource.getMessage("topics.create.flash.2", new String[] {}, locale));
 
 		return "redirect:/topics";
 	}
