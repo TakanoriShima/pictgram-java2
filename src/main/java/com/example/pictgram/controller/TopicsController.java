@@ -42,7 +42,9 @@ import com.example.pictgram.repository.TopicRepository;
 import java.util.Locale;
 import org.springframework.context.MessageSource;
 
+import com.example.pictgram.entity.Comment;
 import com.example.pictgram.entity.Favorite;
+import com.example.pictgram.form.CommentForm;
 import com.example.pictgram.form.FavoriteForm;
 
 @Controller
@@ -85,6 +87,7 @@ public class TopicsController {
 		modelMapper.getConfiguration().setAmbiguityIgnored(true);
 		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setUser));
 		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setFavorites));
+		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setComments));
 		modelMapper.typeMap(Favorite.class, FavoriteForm.class)
 				.addMappings(mapper -> mapper.skip(FavoriteForm::setTopic));
 
@@ -92,6 +95,7 @@ public class TopicsController {
 		if (imageLocal != null) {
 			isImageLocal = new Boolean(imageLocal);
 		}
+		
 		TopicForm form = modelMapper.map(entity, TopicForm.class);
 
 		if (isImageLocal) {
@@ -113,6 +117,7 @@ public class TopicsController {
 		}
 
 		UserForm userForm = modelMapper.map(entity.getUser(), UserForm.class);
+		
 		List<FavoriteForm> favorites = new ArrayList<FavoriteForm>();
 		for (Favorite favoriteEntity : entity.getFavorites()) {
 			FavoriteForm favorite = modelMapper.map(favoriteEntity, FavoriteForm.class);
@@ -122,6 +127,14 @@ public class TopicsController {
 			}
 		}
 		form.setFavorites(favorites);
+
+		List<CommentForm> comments = new ArrayList<CommentForm>();
+		for (Comment commentEntity : entity.getComments()) {
+			CommentForm comment = modelMapper.map(commentEntity, CommentForm.class);
+			comments.add(comment);
+		}
+		form.setComments(comments);
+
 		form.setUser(userForm);
 
 		return form;
